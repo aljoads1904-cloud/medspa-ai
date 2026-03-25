@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedSpa-AI | AI Lead Audit — medspa-ai.aljoai.com</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #03040a;
+    --navy: #060b18;
+    --teal: #0adbbe;
+    --teal-dim: rgba(10,219,190,0.15);
+    --teal-glow: rgba(10,219,190,0.4);
+    --gold: #f0c060;
+    --red: #ff4d6d;
+    --white: #f0f4f8;
+    --muted: #7a8fa6;
+    --card-bg: rgba(10,20,40,0.7);
+    --border: rgba(10,219,190,0.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'DM Sans',sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none;z-index:1000;opacity:0.4;
+  }
+
+  /* ── NAVBAR ── */
+  nav{
+    position:fixed;top:0;width:100%;z-index:900;
+    padding:20px 40px;
+    display:flex;justify-content:space-between;align-items:center;
+    background:rgba(3,4,10,0.85);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo{
+    font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;
+    color:var(--teal);letter-spacing:0.05em;
+  }
+  .logo span{color:var(--white);}
+  .nav-cta{
+    background:var(--teal);color:var(--black);
+    font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;
+    padding:10px 22px;border-radius:6px;
+    text-decoration:none;letter-spacing:0.04em;
+    transition:all 0.25s;border:none;cursor:pointer;
+  }
+  .nav-cta:hover{background:#fff;transform:translateY(-1px);box-shadow:0 8px 32px var(--teal-glow);}
+
+  /* ── HERO ── */
+  .hero{
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;
+    padding:120px 24px 80px;
+    position:relative;overflow:hidden;
+  }
+  #particle-canvas{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    pointer-events:none;
+  }
+  .hero-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(10,219,190,0.1);
+    border:1px solid var(--border);
+    border-radius:100px;padding:6px 18px;
+    font-size:0.78rem;font-weight:500;color:var(--teal);
+    margin-bottom:32px;letter-spacing:0.06em;
+    animation:fadeUp 0.8s ease both;
+  }
+  .badge-dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 8px var(--teal);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.4);}}
+
+  .hero h1{
+    font-family:'Syne',sans-serif;
+    font-size:clamp(2.4rem,6vw,5rem);
+    font-weight:800;
+    line-height:1.08;
+    letter-spacing:-0.02em;
+    max-width:900px;
+    margin-bottom:28px;
+    animation:fadeUp 0.9s 0.1s ease both;
+  }
+  .hero h1 .accent{color:var(--teal);}
+  .hero h1 .warn{color:var(--red);}
+
+  .hero-sub{
+    font-size:clamp(1rem,2vw,1.2rem);
+    color:var(--muted);
+    max-width:580px;
+    line-height:1.7;
+    margin-bottom:48px;
+    font-weight:300;
+    animation:fadeUp 0.9s 0.2s ease both;
+  }
+  .hero-sub strong{color:var(--white);font-weight:500;}
+
+  .hero-cta-group{
+    display:flex;gap:16px;flex-wrap:wrap;justify-content:center;
+    animation:fadeUp 0.9s 0.3s ease both;
+  }
+  .btn-primary{
+    background:var(--teal);color:var(--black);
+    font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+    padding:16px 36px;border-radius:8px;
+    text-decoration:none;letter-spacing:0.03em;
+    transition:all 0.3s;display:inline-flex;align-items:center;gap:10px;
+    box-shadow:0 0 40px rgba(10,219,190,0.3);
+  }
+  .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 50px rgba(10,219,190,0.5);background:#fff;}
+  .btn-secondary{
+    background:transparent;color:var(--white);
+    font-family:'Syne',sans-serif;font-weight:600;font-size:1rem;
+    padding:16px 32px;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.2);
+    text-decoration:none;
+    transition:all 0.3s;
+  }
+  .btn-secondary:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-dim);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ── STATS BAND ── */
+  .stats-band{
+    background:var(--navy);
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:40px 24px;
+  }
+  .stats-grid{
+    max-width:1000px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:32px;text-align:center;
+  }
+  .stat-item .number{
+    font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;
+    color:var(--teal);line-height:1;margin-bottom:8px;
+  }
+  .stat-item .label{color:var(--muted);font-size:0.88rem;font-weight:400;line-height:1.5;}
+
+  /* ── SECTION COMMON ── */
+  section{padding:100px 24px;}
+  .section-inner{max-width:1100px;margin:0 auto;}
+  .section-label{
+    font-size:0.75rem;font-weight:600;letter-spacing:0.15em;
+    color:var(--teal);text-transform:uppercase;margin-bottom:16px;
+  }
+  .section-title{
+    font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);
+    font-weight:800;line-height:1.15;letter-spacing:-0.02em;
+    margin-bottom:20px;
+  }
+  .section-sub{color:var(--muted);font-size:1.05rem;line-height:1.7;max-width:600px;font-weight:300;}
+
+  /* ── PAIN SECTION ── */
+  .pain-section{background:var(--navy);}
+  .pain-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;margin-top:56px;
+  }
+  .pain-card{
+    background:var(--card-bg);
+    border:1px solid rgba(255,77,109,0.2);
+    border-radius:16px;padding:32px;
+    position:relative;overflow:hidden;
+    transition:all 0.4s;
+    cursor:default;
+    transform-style:preserve-3d;
+  }
+  .pain-card::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 0%, rgba(255,77,109,0.08) 0%, transparent 70%);
+    opacity:0;transition:opacity 0.4s;
+  }
+  .pain-card:hover{
+    transform:translateY(-8px) rotateX(4deg);
+    border-color:rgba(255,77,109,0.5);
+    box-shadow:0 24px 60px rgba(255,77,109,0.12);
+  }
+  .pain-card:hover::before{opacity:1;}
+  .pain-icon{font-size:2rem;margin-bottom:20px;display:block;}
+  .pain-card h3{
+    font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;
+    margin-bottom:12px;color:var(--white);
+  }
+  .pain-card p{color:var(--muted);font-size:0.9rem;line-height:1.65;}
+  .pain-card .cost{
+    display:inline-block;margin-top:16px;
+    background:rgba(255,77,109,0.12);
+    border:1px solid rgba(255,77,109,0.25);
+    color:var(--red);font-family:'Syne',sans-serif;
+    font-size:0.8rem;font-weight:700;
+    padding:4px 12px;border-radius:100px;letter-spacing:0.04em;
+  }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-section{background:var(--black);}
+  .flow-diagram{
+    margin-top:64px;
+    display:flex;flex-direction:column;gap:0;
+    position:relative;
+  }
+  .flow-row{
+    display:flex;align-items:center;justify-content:center;
+    gap:0;flex-wrap:wrap;
+  }
+  .flow-node{
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:24px 28px;
+    text-align:center;
+    min-width:180px;
+    max-width:200px;
+    position:relative;
+    transition:all 0.4s;
+    transform-style:preserve-3d;
+  }
+  .flow-node:hover{
+    transform:translateY(-6px) scale(1.03);
+    border-color:var(--teal);
+    box-shadow:0 20px 60px rgba(10,219,190,0.15);
+    background:rgba(10,219,190,0.06);
+  }
+  .flow-node .node-icon{font-size:1.8rem;margin-bottom:10px;}
+  .flow-node .node-title{
+    font-family:'Syne',sans-serif;font-size:0.85rem;
+    font-weight:700;color:var(--white);margin-bottom:6px;
+  }
+  .flow-node .node-desc{
+    font-size:0.75rem;color:var(--muted);line-height:1.5;
+  }
+  .flow-node.highlight{
+    border-color:var(--teal);
+    background:rgba(10,219,190,0.08);
+    box-shadow:0 0 40px rgba(10,219,190,0.1);
+  }
+  .flow-node.highlight .node-title{color:var(--teal);}
+
+  .flow-arrow{
+    width:48px;height:2px;
+    background:linear-gradient(90deg,var(--teal),rgba(10,219,190,0.3));
+    position:relative;flex-shrink:0;
+    margin:0 -2px;
+  }
+  .flow-arrow::after{
+    content:'▶';
+    position:absolute;right:-8px;top:50%;
+    transform:translateY(-50%);
+    color:var(--teal);font-size:10px;
+  }
+  .flow-down{
+    width:2px;height:48px;
+    background:linear-gradient(180deg,var(--teal),rgba(10,219,190,0.3));
+    margin:0 auto;
+    position:relative;
+  }
+  .flow-down::after{
+    content:'▼';
+    position:absolute;bottom:-10px;left:50%;
+    transform:translateX(-50%);
+    color:var(--teal);font-size:10px;
+  }
+  .flow-time-badge{
+    position:absolute;top:-12px;right:-12px;
+    background:var(--teal);color:var(--black);
+    font-family:'Syne',sans-serif;font-size:0.65rem;font-weight:800;
+    padding:3px 8px;border-radius:100px;
+    white-space:nowrap;
+  }
+
+  /* ── BEFORE/AFTER DISINTEGRATION ── */
+  .transform-section{
+    background:var(--navy);
+    padding:100px 24px;
+  }
+  .before-after-container{
+    margin-top:64px;
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:32px;max-width:900px;margin-left:auto;margin-right:auto;
+  }
+  @media(max-width:640px){.before-after-container{grid-template-columns:1fr;}}
+  .ba-card{
+    border-radius:20px;padding:40px 32px;
+    position:relative;overflow:hidden;
+  }
+  .ba-card.before{
+    background:rgba(255,77,109,0.06);
+    border:1px solid rgba(255,77,109,0.2);
+  }
+  .ba-card.after{
+    background:rgba(10,219,190,0.06);
+    border:1px solid rgba(10,219,190,0.25);
+  }
+  .ba-label{
+    font-family:'Syne',sans-serif;font-size:0.7rem;font-weight:800;
+    letter-spacing:0.15em;text-transform:uppercase;
+    margin-bottom:24px;display:flex;align-items:center;gap:8px;
+  }
+  .ba-card.before .ba-label{color:var(--red);}
+  .ba-card.after .ba-label{color:var(--teal);}
+  .ba-item{
+    display:flex;align-items:flex-start;gap:14px;
+    margin-bottom:20px;padding-bottom:20px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .ba-item:last-child{border:none;margin:0;padding:0;}
+  .ba-dot{
+    width:10px;height:10px;border-radius:50%;
+    flex-shrink:0;margin-top:5px;
+  }
+  .before .ba-dot{background:var(--red);box-shadow:0 0 8px var(--red);}
+  .after .ba-dot{background:var(--teal);box-shadow:0 0 8px var(--teal);}
+  .ba-text{font-size:0.9rem;color:var(--muted);line-height:1.6;}
+  .ba-text strong{color:var(--white);}
+
+  /* ── CANVAS PARTICLE SECTION ── */
+  #disintegrate-canvas{
+    display:block;
+    width:100%;max-width:700px;height:300px;
+    margin:40px auto 0;
+    border-radius:16px;
+    border:1px solid var(--border);
+    cursor:pointer;
+  }
+  .canvas-hint{
+    text-align:center;margin-top:12px;
+    font-size:0.8rem;color:var(--muted);
+  }
+  .canvas-hint span{color:var(--teal);}
+
+  /* ── AUDIT SECTION ── */
+  .audit-section{background:var(--black);}
+  .audit-steps{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:24px;margin-top:56px;
+  }
+  .audit-step{
+    position:relative;
+    background:var(--card-bg);
+    border:1px solid var(--border);
+    border-radius:16px;padding:32px 28px;
+    transition:all 0.4s;
+  }
+  .audit-step:hover{
+    border-color:var(--teal);
+    transform:translateY(-6px);
+    box-shadow:0 24px 60px rgba(10,219,190,0.1);
+  }
+  .step-num{
+    font-family:'Syne',sans-serif;font-size:3rem;font-weight:800;
+    color:rgba(10,219,190,0.12);line-height:1;margin-bottom:16px;
+  }
+  .audit-step h3{
+    font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+    margin-bottom:10px;
+  }
+  .audit-step p{color:var(--muted);font-size:0.88rem;line-height:1.65;}
+
+  /* ── CTA SECTION ── */
+  .cta-section{
+    background:var(--navy);
+    text-align:center;padding:120px 24px;
+    position:relative;overflow:hidden;
+  }
+  .cta-glow{
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:600px;height:400px;
+    background:radial-gradient(circle,rgba(10,219,190,0.12) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .cta-section h2{
+    font-family:'Syne',sans-serif;
+    font-size:clamp(2rem,5vw,3.8rem);
+    font-weight:800;letter-spacing:-0.02em;
+    margin-bottom:24px;position:relative;
+  }
+  .cta-section p{
+    color:var(--muted);font-size:1.1rem;line-height:1.7;
+    max-width:520px;margin:0 auto 48px;font-weight:300;
+  }
+  .cta-section .btn-primary{font-size:1.1rem;padding:20px 48px;}
+  .cta-guarantee{
+    margin-top:24px;font-size:0.82rem;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .cta-guarantee::before{content:'🔒';}
+
+  /* ── FOOTER ── */
+  footer{
+    background:var(--black);
+    border-top:1px solid var(--border);
+    padding:32px 24px;text-align:center;
+    color:var(--muted);font-size:0.82rem;
+  }
+  footer a{color:var(--teal);text-decoration:none;}
+
+  /* ── SCROLL REVEAL ── */
+  .reveal{
+    opacity:0;transform:translateY(32px);
+    transition:opacity 0.7s ease,transform 0.7s ease;
+  }
+  .reveal.visible{opacity:1;transform:translateY(0);}
+
+  /* ── MOBILE ── */
+  @media(max-width:768px){
+    nav{padding:16px 20px;}
+    .flow-arrow{width:24px;}
+    .flow-node{min-width:140px;padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo">MEDSPA<span style="color:var(--white)">-AI</span> <span style="font-size:0.65rem;color:var(--muted);font-weight:400;letter-spacing:0.04em;margin-left:6px;vertical-align:middle;">by ALJO<span style="color:var(--teal)">AI</span></span></div>
+  <a href="#audit" class="nav-cta">Book Free Audit →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="hero-badge">
+    <span class="badge-dot"></span>
+    AI Lead Recovery Specialists — Med Spa & Aesthetic Clinics
+  </div>
+
+  <h1>
+    Your Med Spa Is Losing<br>
+    <span class="warn">£4,000+ Every Month</span><br>
+    <span class="accent">While You Sleep.</span>
+  </h1>
+
+  <p class="hero-sub">
+    <strong>78% of clients book with the first clinic that responds.</strong>
+    Your current system responds in hours. Ours responds in 58 seconds —
+    24/7, automatically, while you focus on your clients.
+  </p>
+
+  <div class="hero-cta-group">
+    <a href="#audit" class="btn-primary">
+      Get My Free AI Audit
+      <span>→</span>
+    </a>
+    <a href="#flow" class="btn-secondary">See How It Works</a>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<div class="stats-band">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <div class="number" data-target="78">0</div>
+      <div class="label">% of clients book with the<br>first clinic to respond</div>
+    </div>
+    <div class="stat-item">
+      <div class="number">58<span style="font-size:1.4rem">s</span></div>
+      <div class="label">Our AI response time —<br>any time, any day</div>
+    </div>
+    <div class="stat-item">
+      <div class="number" data-target="40">0</div>
+      <div class="label">% of med spas already using<br>AI — but losing leads anyway</div>
+    </div>
+    <div class="stat-item">
+      <div class="number">£<span data-target="4000" style="font-size:2.6rem;font-family:'Syne',sans-serif;font-weight:800;">0</span></div>
+      <div class="label">Average monthly revenue<br>lost to slow follow-up</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAIN SECTION -->
+<section class="pain-section">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">The Problem</div>
+      <h2 class="section-title">Sound familiar?</h2>
+      <p class="section-sub">These are the exact gaps bleeding revenue from med spas every single week — whether they know it or not.</p>
+    </div>
+    <div class="pain-grid">
+      <div class="pain-card reveal">
+        <span class="pain-icon">🌙</span>
+        <h3>The 9PM Lead Problem</h3>
+        <p>A potential client fills out your contact form on a Friday evening. By the time someone sees it Monday morning, they've already booked with a competitor who responded in minutes.</p>
+        <span class="cost">Costs you 3–5 clients/month</span>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-icon">🤖</span>
+        <h3>Broken AI Nobody Fixed</h3>
+        <p>You set up a chatbot 6 months ago. It answers FAQs but never books consultations. You're paying for it monthly and it's quietly failing you — you just don't have the data to see it.</p>
+        <span class="cost">40% of clinics affected</span>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-icon">📉</span>
+        <h3>Leads That Just Disappear</h3>
+        <p>Instagram DMs, website forms, Google enquiries — they pour in from different places and nobody has a system to catch them all. Most slip through every week.</p>
+        <span class="cost">30–50% of leads lost</span>
+      </div>
+      <div class="pain-card reveal">
+        <span class="pain-icon">⏱️</span>
+        <h3>The 47-Hour Response Gap</h3>
+        <p>The industry average response time is 6–24 hours. Your competitor has AI responding in under 60 seconds. Every hour you wait, the probability of conversion drops by 10x.</p>
+        <span class="cost">10x lower conversion rate</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW SECTION -->
+<section class="flow-section" id="flow">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:0;">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">From Lead To Booked Consultation<br><span style="color:var(--teal)">In Under 60 Seconds.</span></h2>
+      <p class="section-sub" style="margin:0 auto 0;">This is what happens to every single enquiry that comes into your clinic — 24 hours a day, 7 days a week — completely automatically.</p>
+    </div>
+
+    <div class="flow-diagram reveal" style="margin-top:64px;">
+
+      <!-- ROW 1 -->
+      <div class="flow-row">
+        <div class="flow-node">
+          <span class="node-icon">📝</span>
+          <div class="node-title">Lead Arrives</div>
+          <div class="node-desc">Website form, Instagram DM, Google, ads — any source</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-node highlight">
+          <div class="flow-time-badge">⚡ 58 seconds</div>
+          <span class="node-icon">🤖</span>
+          <div class="node-title">AI Responds Instantly</div>
+          <div class="node-desc">Personalised message sent automatically — day or night</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-node">
+          <span class="node-icon">💬</span>
+          <div class="node-title">AI Qualifies Lead</div>
+          <div class="node-desc">3 smart questions via SMS to assess intent and budget</div>
+        </div>
+      </div>
+
+      <div class="flow-down"></div>
+
+      <!-- ROW 2 -->
+      <div class="flow-row">
+        <div class="flow-node">
+          <span class="node-icon">📊</span>
+          <div class="node-title">Live Dashboard</div>
+          <div class="node-desc">Full pipeline visibility — see every lead's status in real time</div>
+        </div>
+        <div class="flow-arrow" style="transform:scaleX(-1)"></div>
+        <div class="flow-node">
+          <span class="node-icon">🔔</span>
+          <div class="node-title">14-Day Nurture</div>
+          <div class="node-desc">Cold leads auto-followed up over 14 days — zero manual work</div>
+        </div>
+        <div class="flow-arrow" style="transform:scaleX(-1)"></div>
+        <div class="flow-node highlight">
+          <div class="flow-time-badge">✅ Auto-booked</div>
+          <span class="node-icon">📅</span>
+          <div class="node-title">Consultation Booked</div>
+          <div class="node-desc">Drops directly into your calendar with reminder sequences</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER + CANVAS -->
+<section class="transform-section">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">The Transformation</div>
+      <h2 class="section-title">Before Our Audit.<br>After Our Audit.</h2>
+      <p class="section-sub" style="margin:0 auto;">We don't just tell you what's broken. We fix it — and show you the numbers before and after.</p>
+    </div>
+
+    <div class="before-after-container reveal">
+      <div class="ba-card before">
+        <div class="ba-label">⚠ Before Audit</div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>6–24 hour response times</strong> — leads go cold and book elsewhere</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>Chatbot answers FAQs</strong> but never converts to bookings</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>No visibility</strong> on how many leads are being lost monthly</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>Manual follow-up</strong> that relies on staff remembering</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>30–50% of enquiries</strong> never receive a response</div>
+        </div>
+      </div>
+      <div class="ba-card after">
+        <div class="ba-label">✓ After Audit & Fix</div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>58-second AI response</strong> — every lead, every time, automatically</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>AI qualifies and books</strong> consultations directly into your calendar</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>Live dashboard</strong> showing every lead, stage and revenue forecast</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>14-day AI nurture</strong> sequence follows up every cold lead automatically</div>
+        </div>
+        <div class="ba-item">
+          <div class="ba-dot"></div>
+          <div class="ba-text"><strong>Zero leads lost</strong> — every enquiry captured, tracked and converted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE PARTICLE CANVAS -->
+    <div class="reveal" style="text-align:center;margin-top:56px;">
+      <div class="section-label">Interactive Demo</div>
+      <h3 style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:8px;">Watch Your Leads Transform</h3>
+      <canvas id="disintegrate-canvas"></canvas>
+      <p class="canvas-hint"><span>Click the canvas</span> to see leads disintegrate from chaos → order</p>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIT SECTION -->
+<section class="audit-section" id="audit">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center;">
+      <div class="section-label">Free Offer</div>
+      <h2 class="section-title">Your Free AI Lead Audit<br><span style="color:var(--teal)">Takes 20 Minutes.</span></h2>
+      <p class="section-sub" style="margin:0 auto;">No pitch. No pressure. Just a clear picture of how many leads you're losing monthly and exactly what it's costing your clinic.</p>
+    </div>
+    <div class="audit-steps">
+      <div class="audit-step reveal">
+        <div class="step-num">01</div>
+        <h3>We Review Your Setup</h3>
+        <p>We look at your current lead sources, response process, and any existing automation — with or without AI already in place.</p>
+      </div>
+      <div class="audit-step reveal">
+        <div class="step-num">02</div>
+        <h3>We Find The Gaps</h3>
+        <p>We identify exactly where leads are slipping through — after hours, slow response, missing follow-up sequences, broken chatbot logic.</p>
+      </div>
+      <div class="audit-step reveal">
+        <div class="step-num">03</div>
+        <h3>We Show You The Number</h3>
+        <p>You leave the call knowing the exact monthly revenue you're losing and what a fixed system would recover for your clinic.</p>
+      </div>
+      <div class="audit-step reveal">
+        <div class="step-num">04</div>
+        <h3>Zero Obligation</h3>
+        <p>The audit is genuinely free. If you want us to fix it, we offer a 30-day pilot. If not, you keep the insights. No hard sell. Ever.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="reveal">
+    <h2>Ready To Stop<br><span style="color:var(--teal)">Losing Consultations?</span></h2>
+    <p>Book your free 20-minute AI Audit below. We have limited spots available this month for clinics in the UK, US, Canada and Australia.</p>
+    <a href="YOUR_CALENDLY_LINK_HERE" class="btn-primary" target="_blank">
+      Book My Free AI Audit →
+    </a>
+    <div class="cta-guarantee">30-day pilot — if you don't see results, you don't pay for month two</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 MedSpa-AI — A division of <a href="https://aljoai.com" target="_blank">ALJOAI</a><br>
+  <a href="mailto:hello@medspa-ai.aljoai.com">hello@medspa-ai.aljoai.com</a> &nbsp;·&nbsp;
+  <a href="https://medspa-ai.aljoai.com">medspa-ai.aljoai.com</a> &nbsp;·&nbsp; Serving UK · USA · Canada · Australia</p>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── PARTICLE HERO BACKGROUND ──
+(function(){
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  function resize(){
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor(){this.reset(true);}
+    reset(init){
+      this.x = Math.random() * W;
+      this.y = init ? Math.random() * H : H + 10;
+      this.vx = (Math.random()-0.5)*0.4;
+      this.vy = -(Math.random()*0.8+0.2);
+      this.r = Math.random()*2+0.5;
+      this.alpha = Math.random()*0.6+0.1;
+      this.color = Math.random()>0.7 ? '#0adbbe' : '#f0f4f8';
+    }
+    update(){
+      this.x+=this.vx; this.y+=this.vy;
+      this.alpha-=0.0015;
+      if(this.alpha<=0||this.y<-10) this.reset(false);
+    }
+    draw(){
+      ctx.beginPath();
+      ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=this.color;
+      ctx.globalAlpha=this.alpha;
+      ctx.fill();
+    }
+  }
+  for(let i=0;i<120;i++) particles.push(new Particle());
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    ctx.globalAlpha=1;
+    particles.forEach(p=>{p.update();p.draw();});
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ── DISINTEGRATION CANVAS ──
+(function(){
+  const canvas = document.getElementById('disintegrate-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  function resize(){
+    W = canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    H = canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    drawState();
+  }
+  let state = 0; // 0=chaos, 1=order, animating=false
+  let animating = false;
+  let particles = [];
+  let progress = 0;
+
+  const CHAOS_DOTS = [];
+  const ORDER_DOTS = [];
+
+  function buildDots(){
+    CHAOS_DOTS.length = 0; ORDER_DOTS.length = 0;
+    const cw = canvas.offsetWidth, ch = canvas.offsetHeight;
+    for(let i=0;i<200;i++){
+      CHAOS_DOTS.push({
+        x: Math.random()*cw, y: Math.random()*ch,
+        color: Math.random()>0.5?'#ff4d6d':'rgba(255,77,109,0.4)'
+      });
+    }
+    // Order = pipeline visual (5 columns of dots)
+    const cols = 5, rows = 8;
+    const sx = cw*0.12, ex = cw*0.88;
+    const sy = ch*0.15, ey = ch*0.85;
+    let idx=0;
+    for(let c=0;c<cols;c++){
+      for(let r=0;r<rows;r++){
+        ORDER_DOTS[idx++] = {
+          x: sx + (ex-sx)*(c/(cols-1)),
+          y: sy + (ey-sy)*(r/(rows-1)),
+          color:'#0adbbe'
+        };
+      }
+    }
+  }
+
+  function drawState(){
+    const cw=canvas.offsetWidth, ch=canvas.offsetHeight;
+    ctx.clearRect(0,0,cw,ch);
+    // draw grid lines
+    ctx.strokeStyle='rgba(10,219,190,0.06)';
+    ctx.lineWidth=1;
+    for(let i=1;i<5;i++){
+      ctx.beginPath();ctx.moveTo(cw*i/5,0);ctx.lineTo(cw*i/5,ch);ctx.stroke();
+    }
+    // labels
+    if(state===0){
+      ctx.fillStyle='rgba(255,77,109,0.5)';
+      ctx.font='bold 11px Syne,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('UNMANAGED LEADS — CHAOS',cw/2,20);
+      ctx.font='10px DM Sans,sans-serif';
+      ctx.fillStyle='rgba(255,77,109,0.35)';
+      ctx.fillText('Click to see AI transform your pipeline →',cw/2,ch-10);
+      CHAOS_DOTS.forEach(d=>{
+        ctx.beginPath();ctx.arc(d.x,d.y,3,0,Math.PI*2);
+        ctx.fillStyle=d.color;ctx.fill();
+      });
+    } else {
+      ctx.fillStyle='rgba(10,219,190,0.6)';
+      ctx.font='bold 11px Syne,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('AI-MANAGED PIPELINE — ORDER',cw/2,20);
+      ctx.font='10px DM Sans,sans-serif';
+      ctx.fillStyle='rgba(10,219,190,0.35)';
+      ctx.fillText('Click to reset →',cw/2,ch-10);
+      // Draw column labels
+      const labels=['Enquiry','Qualify','Nurture','Book','✓ Win'];
+      const cols=5,sx=cw*0.12,ex=cw*0.88;
+      labels.forEach((l,i)=>{
+        ctx.fillStyle='rgba(10,219,190,0.5)';
+        ctx.font='9px Syne,sans-serif';
+        ctx.fillText(l,sx+(ex-sx)*(i/(cols-1)),35);
+      });
+      ORDER_DOTS.forEach(d=>{
+        ctx.beginPath();ctx.arc(d.x,d.y,4,0,Math.PI*2);
+        ctx.fillStyle=d.color;
+        ctx.shadowColor=d.color;ctx.shadowBlur=6;
+        ctx.fill();ctx.shadowBlur=0;
+      });
+    }
+  }
+
+  function animate(){
+    if(!animating) return;
+    progress+=0.018;
+    if(progress>=1){progress=1;animating=false;drawState();return;}
+    const cw=canvas.offsetWidth,ch=canvas.offsetHeight;
+    ctx.clearRect(0,0,cw,ch);
+    ctx.strokeStyle='rgba(10,219,190,0.06)';ctx.lineWidth=1;
+    for(let i=1;i<5;i++){
+      ctx.beginPath();ctx.moveTo(cw*i/5,0);ctx.lineTo(cw*i/5,ch);ctx.stroke();
+    }
+    // easing
+    const t=progress<0.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;
+    const from = state===1? CHAOS_DOTS : ORDER_DOTS;
+    const to   = state===1? ORDER_DOTS  : CHAOS_DOTS;
+    const n=Math.min(from.length,to.length);
+    for(let i=0;i<n;i++){
+      const fx=from[i].x,fy=from[i].y,tx=to[i].x,ty=to[i].y;
+      const x=fx+(tx-fx)*t, y=fy+(ty-fy)*t;
+      // scatter burst mid-animation
+      const scatter=Math.sin(t*Math.PI)*20;
+      const sx2=x+(Math.random()-0.5)*scatter;
+      const sy2=y+(Math.random()-0.5)*scatter;
+      const col=state===1?`rgba(10,219,190,${0.3+t*0.7})`:`rgba(255,77,109,${0.3+(1-t)*0.7})`;
+      ctx.beginPath();ctx.arc(sx2,sy2,3,0,Math.PI*2);
+      ctx.fillStyle=col;ctx.fill();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  canvas.addEventListener('click',()=>{
+    if(animating) return;
+    state = state===0?1:0;
+    progress=0;animating=true;
+    animate();
+  });
+
+  window.addEventListener('resize',()=>{resize();buildDots();drawState();});
+
+  function init(){
+    const ro=new ResizeObserver(()=>{resize();buildDots();drawState();});
+    ro.observe(canvas);
+    buildDots();drawState();
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}
+  else init();
+})();
+
+// ── COUNTER ANIMATION ──
+function animateCounter(el,target,prefix='',suffix='%'){
+  let start=0,duration=2000,step=duration/60;
+  let timer=setInterval(()=>{
+    start+=target/60;
+    if(start>=target){start=target;clearInterval(timer);}
+    el.innerHTML=prefix+Math.floor(start)+suffix;
+  },step);
+}
+
+// ── SCROLL REVEAL ──
+const reveals=document.querySelectorAll('.reveal');
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:0.12});
+reveals.forEach(r=>obs.observe(r));
+
+// ── STAT COUNTERS ──
+const statNums=document.querySelectorAll('[data-target]');
+const statObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const target=+e.target.dataset.target;
+  
